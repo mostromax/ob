@@ -3,162 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Bolsas</title>
+    <title>MaxiCalculator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-        }
-        h1 {
-            text-align: center;
+            margin: 20px;
+            background-color: #f5f5f5;
             color: #333;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
         }
         label {
             display: block;
-            margin-top: 10px;
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 1.1em;
         }
         input, select {
             width: 100%;
             padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
+            margin-top: 7px;
             border-radius: 5px;
+            border: 1px solid #888;
+            font-size: 1.1em;
         }
-        .btn {
-            margin-top: 20px;
+        button {
             width: 100%;
-            padding: 10px;
-            background-color: #28a745;
+            padding: 12px;
+            margin-top: 25px;
+            background-color: #4caf50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1.2em;
         }
-        .btn:hover {
-            background-color: #218838;
+        button:hover {
+            background-color: #388e3c;
         }
-        .results {
-            display: none;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
+        .result {
+            margin-top: 25px;
+            padding: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            font-size: 1.1em;
         }
-        button.print-btn {
-            margin-top: 10px;
-            background-color: #007bff;
-            border: none;
+        .print-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px;
+            background-color: #4caf50;
             color: white;
-            cursor: pointer;
-            padding: 10px;
+            text-align: center;
+            width: 70%;
             border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .print-btn:hover {
+            background-color: #388e3c;
+        }
+        @media print {
+            body *:not(.result):not(.result *) {
+                visibility: hidden;
+            }
+            .result, .result * {
+                visibility: visible;
+            }
+            .result {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .print-btn {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>Calculadora de Bolsas</h1>
-    <form id="calcForm">
-        <label for="nombrecliente">Nombre Cliente (Opcional):</label>
-        <input type="text" id="nombrecliente" name="nombrecliente">
-
-        <label for="ancho">Ancho (cm):</label>
+    <h1 style="text-align: center; display:none;">MaxiCalculator</h1>
+    <form id="calculadoraForm">
+        <label for="cliente">Nombre del Cliente (Opcional)</label>
+        <input type="text" id="cliente" name="cliente">
+        
+        <label for="ancho">Ancho (cm)</label>
         <input type="number" id="ancho" name="ancho" min="20" max="140" required>
 
-        <label for="largo">Largo (cm):</label>
+        <label for="largo">Largo (cm)</label>
         <input type="number" id="largo" name="largo" min="30" max="160" required>
 
-        <label for="espesor">Espesor (micrones):</label>
-        <input type="number" id="espesor" name="espesor" step="0.001" min="0.015" max="0.100" required>
+        <label for="espesor">Espesor (micrones)</label>
+        <input type="number" id="espesor" name="espesor" step="0.001" min="0.015" max="0.200" required>
 
-        <label for="densidad">Densidad:</label>
-        <select id="densidad" name="densidad">
+        <label for="densidad">Densidad</label>
+        <select id="densidad" name="densidad" onchange="actualizarMaterial()" required>
             <option value="0.093">Baja Densidad (0.093)</option>
             <option value="0.095">Alta Densidad (0.095)</option>
         </select>
 
-        <label for="cantidad">Cantidad (Unidades o Kilos):</label>
-        <input type="number" id="cantidad" name="cantidad" required>
+        <label for="material">Material</label>
+        <select id="material" name="material" required>
+            <!-- Materiales dinámicamente actualizados por JavaScript -->
+        </select>
 
-        <label for="unidadTipo">Tipo de Cantidad:</label>
-        <select id="unidadTipo" name="unidadTipo">
+        <label for="cantidadTipo">Tipo de Cantidad</label>
+        <select id="cantidadTipo" name="cantidadTipo" required>
             <option value="unidades">Unidades</option>
             <option value="kilos">Kilos</option>
         </select>
 
-        <button type="button" class="btn" onclick="calcular()">Calcular</button>
+        <label for="cantidad">Cantidad</label>
+        <input type="number" id="cantidad" name="cantidad" required>
+
+        <button type="button" onclick="calcular()">Calcular</button>
     </form>
 
-    <div id="resultados" class="results">
-        <h2>Especificaciones de Extrusión</h2>
-        <p id="extrusion"></p>
+    <div id="resultados" class="result"></div>
 
-        <h2>Especificaciones de Sellado</h2>
-        <p id="sellado"></p>
+    <button class="print-btn" onclick="imprimirEspecificaciones()">Imprimir Especificaciones</button>
 
-        <button class="print-btn" onclick="window.print()">Imprimir</button>
-    </div>
-</div>
+    <script>
+        function actualizarMaterial() {
+            const densidad = document.getElementById('densidad').value;
+            const materialSelect = document.getElementById('material');
+            materialSelect.innerHTML = '';
 
-<script>
-function calcular() {
-    const cliente = document.getElementById("nombrecliente").value || "Cliente";
-    const ancho = parseFloat(document.getElementById("ancho").value);
-    const largo = parseFloat(document.getElementById("largo").value);
-    const espesor = parseFloat(document.getElementById("espesor").value);
-    const densidad = parseFloat(document.getElementById("densidad").value);
-    const cantidad = parseFloat(document.getElementById("cantidad").value);
-    const unidadTipo = document.getElementById("unidadTipo").value;
+            if (densidad == '0.093') {
+                materialSelect.innerHTML += `<option value="N">Negro (N)</option>`;
+                materialSelect.innerHTML += `<option value="V B/D">Virgen Baja (V B/D)</option>`;
+                materialSelect.innerHTML += `<option value="T1">Transparente 1ra (T1)</option>`;
+                materialSelect.innerHTML += `<option value="T2">Transparente 2da (T2)</option>`;
+                materialSelect.innerHTML += `<option value="Bco">Blanco (Bco)</option>`;
+            } else {
+                materialSelect.innerHTML += `<option value="V A/D">Virgen Alta (V A/D)</option>`;
+            }
+        }
 
-    const pu = ancho * largo * espesor * densidad * 2;
-    const pm = ancho * 100 * espesor * densidad * 2;
-    const us = Math.floor((20000 / pu) / 10) * 10;
-    const ps = us * pu / 1000;
-    const f = (ancho <= 99) ? "--" : 20;
-    const op = (ancho <= 99) ? ancho : ancho - 40;
-    const kge = (unidadTipo === "unidades") ? pu * cantidad / 1000 : cantidad;
-    const sa = (unidadTipo === "unidades") ? cantidad / us : cantidad / ps;
+        actualizarMaterial();
 
-    const medidaExtrusion = `${cliente} ${ancho} x ${espesor}`;
-    const medidaSellado = `${cliente} ${ancho} x ${largo} x ${espesor}`;
+        function calcular() {
+            const cliente = document.getElementById('cliente').value;
+            const a = parseFloat(document.getElementById('ancho').value);
+            const l = parseFloat(document.getElementById('largo').value);
+            const e = parseFloat(document.getElementById('espesor').value);
+            const d = parseFloat(document.getElementById('densidad').value);
+            const mat = document.getElementById('material').value;
+            const cantidadTipo = document.getElementById('cantidadTipo').value;
+            const cantidad = parseFloat(document.getElementById('cantidad').value);
 
-    document.getElementById("extrusion").innerHTML = `
-        Medida: ${medidaExtrusion}<br>
-        Ancho: ${ancho} cm<br>
-        Espesor: ${espesor} micrones<br>
-        Fuelles: ${f}<br>
-        Ancho óptico: ${op} cm<br>
-        Peso metro: ${pm.toFixed(2)} g<br>
-        Kilos Extrusión: ${kge.toFixed(2)} kg
-    `;
+            const pu = a * l * e * d * 2;
+            const pm = a * 100 * e * d * 2;
 
-    document.getElementById("sellado").innerHTML = `
-        Medida: ${medidaSellado}<br>
-        Unidades al saco: ${us}<br>
-        Paquetes al saco: ${(us / 10)}<br>
-        Peso bolsa: ${pu.toFixed(2)} g<br>
-        Peso paquete: ${(pu * 10).toFixed(2)} g<br>
-        Peso saco: ${ps.toFixed(2)} kg<br>
-        Sacos Aproximados: ${sa.toFixed(2)}
-    `;
+            let us = Math.floor(20000 / pu / 10) * 10;
+            const ps = (us * pu) / 1000;
 
-    document.getElementById("resultados").style.display = "block";
-}
-</script>
+            const f = a <= 99 ? "--" : 20;
+            const op = a <= 99 ? a : a - 40;
 
+            let kge = cantidadTipo === "unidades" ? (pu * cantidad) / 1000 : cantidad;
+            const kgec = kge * 1.03;
+
+            const sa = cantidadTipo === "unidades" ? Math.ceil(cantidad / us) : Math.ceil(cantidad / ps);
+
+            let result = `<h2>Especificaciones de Extrusión</h2>`;
+            result += `<p><strong>Etiqueta Bobinas:</strong> ${cliente ? cliente + ' - ' : ''}${a}x${e} (${mat})</p>`;
+            result += `<p><strong>Material:</strong> ${mat}</p>`;
+            result += `<p><strong>Ancho:</strong> ${a} cm</p>`;
+            result += `<p><strong>Espesor:</strong> ${e} micrones</p>`;
+            result += `<p><strong>Fuelles:</strong> ${f} cm</p>`;
+            result += `<p><strong>Ancho Óptico:</strong> ${op} cm</p>`;
+            result += `<p><strong>Peso por Metro:</strong> ${pm.toFixed(2)} g</p>`;
+            result += `<p><strong>Kilos Extrusión:</strong> ${kge.toFixed(2)} kg</p>`;
+            result += `<p><strong>Kilos Extrusión Corregidos:</strong> ${kgec.toFixed(2)} kg</p>`;
+
+            result += `<h2>Especificaciones de Sellado</h2>`;
+            result += `<p><strong>Etiqueta Saco:</strong> ${cliente ? cliente + ' - ' : ''}${a}x${l}x${e} (${mat})</p>`;
+            result += `<p><strong>Unidades al Saco:</strong> ${us}</p>`;
+            result += `<p><strong>Paquetes al Saco:</strong> ${(us / 10).toFixed(0)} paquetes de 10 unidades</p>`;
+            result += `<p><strong>Peso Bolsa:</strong> ${pu.toFixed(2)} g</p>`;
+            result += `<p><strong>Peso Paquete:</strong> ${(pu * 10).toFixed(2)} g</p>`;
+            result += `<p><strong>Peso Saco:</strong> ${ps.toFixed(2)} kg</p>`;
+            result += `<p><strong>Sacos Aprox:</strong> ${sa} sacos de ${us} + saldo</p>`;
+            result += `<p><strong>Trabajar a:</strong> ${e >= 0.059 ? "Una Pista" : "Dos Pistas"}</p>`;
+
+            document.getElementById('resultados').innerHTML = result;
+        }
+
+        function imprimirEspecificaciones() {
+            window.print();
+        }
+    </script>
 </body>
 </html>
