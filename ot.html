@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordenes de Trabajo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 7px;
+            border-radius: 5px;
+            border: 1px solid #888;
+            font-size: 1.1em;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 25px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        button:hover {
+            background-color: #388e3c;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            font-size: 1.1em;
+        }
+        .print-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px;
+            background-color: #4caf50;
+            color: white;
+            text-align: center;
+            width: 70%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .print-btn:hover {
+            background-color: #388e3c;
+        }
+        .separator {
+            border-top: 2px solid #ddd;
+            margin: 20px 0;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        @media print {
+            body *:not(.result):not(.result *) {
+                visibility: hidden;
+            }
+            .result, .result * {
+                visibility: visible;
+            }
+            .result {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .print-btn {
+                display: none;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; display:none;">Orden de Trabajo</h1>
+    <form id="calculadoraForm">
+        <label for="cliente">Nombre interno del Cliente (Opcional)</label>
+        <input type="text" id="cliente" name="cliente">
+        
+        <label for="ancho">Ancho (cm)</label>
+        <input type="number" id="ancho" name="ancho" min="20" max="140" required>
+
+        <label for="largo">Largo (cm)</label>
+        <input type="number" id="largo" name="largo" min="30" max="160" required>
+
+        <label for="espesor">Espesor (micrones)</label>
+        <input type="number" id="espesor" name="espesor" step="0.001" min="0.015" max="0.200" required>
+
+        <label for="densidad">Densidad</label>
+        <select id="densidad" name="densidad" onchange="actualizarMaterial()" required>
+            <option value="0.093">Baja Densidad (0.093)</option>
+            <option value="0.095">Alta Densidad (0.095)</option>
+        </select>
+
+        <label for="material">Material</label>
+        <select id="material" name="material" required>
+            <!-- Materiales dinámicamente actualizados por JavaScript -->
+        </select>
+
+        <label for="cantidadTipo">Tipo de Cantidad</label>
+        <select id="cantidadTipo" name="cantidadTipo" required>
+            <option value="unidades">Unidades</option>
+            <option value="kilos">Kilos</option>
+        </select>
+
+        <label for="cantidad">Cantidad</label>
+        <input type="number" id="cantidad" name="cantidad" required>
+
+        <label for="notaExtrusion">Nota Extra a Extrusión (Opcional)</label>
+        <input type="text" id="notaExtrusion" name="notaExtrusion">
+
+        <label for="notaSellado">Nota Extra a Sellado (Opcional)</label>
+        <input type="text" id="notaSellado" name="notaSellado">
+
+        <label for="precioCotizado">Precio Cotizado (Opcional)</label>
+        <input type="number" id="precioCotizado" name="precioCotizado" step="0.01">
+
+        <label for="fechaEntrega">Fecha de Entrega (Opcional)</label>
+        <input type="date" id="fechaEntrega" name="fechaEntrega">
+
+        <button type="button" onclick="calcular()">Calcular</button>
+    </form>
+
+    <div id="resultados" class="result"></div>
+
+    <button class="print-btn" onclick="imprimirEspecificaciones()">Imprimir Especificaciones</button>
+
+    <script>
+        function actualizarMaterial() {
+            const densidad = document.getElementById('densidad').value;
+            const materialSelect = document.getElementById('material');
+            materialSelect.innerHTML = '';
+
+            if (densidad == '0.093') {
+                materialSelect.innerHTML += `<option value="N">Negro (N)</option>`;
+                materialSelect.innerHTML += `<option value="V B/D">Virgen Baja (V B/D)</option>`;
+                materialSelect.innerHTML += `<option value="T1">Transparente 1ra (T1)</option>`;
+                materialSelect.innerHTML += `<option value="T2">Transparente 2da (T2)</option>`;
+                materialSelect.innerHTML += `<option value="Bco">Blanco (Bco)</option>`;
+            } else {
+                materialSelect.innerHTML += `<option value="V A/D">Virgen Alta (V A/D)</option>`;
+            }
+        }
+
+        function formatFecha(fecha) {
+            const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+            const date = new Date(fecha);
+            const diaSemana = dias[date.getDay()];
+            const dia = String(date.getDate()).padStart(2, '0');
+            const mes = String(date.getMonth() + 1).padStart(2, '0');
+            const anio = String(date.getFullYear()).slice(-2);
+            return `${diaSemana} ${dia}/${mes}/${anio}`;
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function calcular() {
+            const cliente = document.getElementById('cliente').value;
+            const a = parseFloat(document.getElementById('ancho').value);
+            const l = parseFloat(document.getElementById('largo').value);
+            const e = parseFloat(document.getElementById('espesor').value);
+            const d = parseFloat(document.getElementById('densidad').value);
+            const mat = document.getElementById('material').value;
+            const cantidadTipo = document.getElementById('cantidadTipo').value;
+            const cantidad = parseFloat(document.getElementById('cantidad').value);
+            const notaExtrusion = document.getElementById('notaExtrusion').value;
+            const notaSellado = document.getElementById('notaSellado').value;
+            const precioCotizado = parseFloat(document.getElementById('precioCotizado').value) || 0;
+            const fechaEntrega = document.getElementById('fechaEntrega').value;
+            const fechaHoraEmision = formatFecha(new Date());
+
+            const pu = a * l * e * d * 2;
+            const pm = a * 100 * e * d * 2;
+
+            let us = Math.floor(20000 / pu / 10) * 10;
+            const ps = (us * pu) / 1000;
+
+            const fuelles = a > 90 ? (a - 90) / 2 : 0;
+            const op = a - 2 * fuelles;
+
+            const psAprox = (a <= 99 ? "--" : 20);
+            let kge = cantidadTipo === "unidades" ? Math.ceil((pu * cantidad) / 1000) : cantidad;
+            const kgec = Math.ceil(kge * 1.03);
+            const sa = cantidadTipo === "unidades" ? Math.ceil(cantidad / us) : Math.ceil(cantidad / ps);
+
+            const valorNetoNegocio = precioCotizado * cantidad;
+
+            let result = `<h2>Orden de Trabajo</h2>`;
+            result += `<h2>Control y Seguimiento : Administración (USO INTERNO)</h2>`;
+            result += `<p><strong>Fecha de Emisión:</strong> ${fechaHoraEmision}</p>`;
+            result += `<p><strong>Fecha de Entrega:</strong> ${fechaEntrega ? formatFecha(fechaEntrega) : 'Sin Fecha'}</p>`;
+            result += `<p><strong>Nombre Cliente:</strong> ${cliente || 'No especificado'}</p>`;
+            result += `<p><strong>Producto:</strong> ${cliente ? cliente + ' - ' : ''}${a}x${l}x${e} (${mat})</p>`;
+            result += `<p><strong>Cantidad:</strong> ${cantidad} ${cantidadTipo}</p>`;
+            result += `<p><strong>Kilos Extrusión (Corregidos):</strong> ${kgec.toFixed(2)} kg</p>`;
+            result += `<p><strong>Sacos (Aprox):</strong> ${sa} sacos de ${us} + saldo</p>`;
+            result += `<p><strong>Precio Cotizado (Para: Facturar):</strong> $${formatNumber(precioCotizado)}</p>`;
+            result += `<p><strong>Valor Neto - Orden de Trabajo:</strong> $${formatNumber(valorNetoNegocio)}</p>`;
+
+            result += `<div class="separator"></div>`;
+            
+            result += `<div class="page-break"></div>`;
+            
+            result += `<h2>Orden de Trabajo - Extrusión</h2>`;
+            result += `<p><strong>Fecha de Emisión:</strong> ${fechaHoraEmision}</p>`;
+            result += `<p><strong>Fecha de Entrega:</strong> ${fechaEntrega ? formatFecha(fechaEntrega) : 'Sin Fecha'}</p>`;
+            result += `<p><strong>Etiqueta Bobinas:</strong> ${cliente ? cliente + ' - ' : ''}${a}x${e} (${mat})</p>`;
+            result += `<p><strong>Material:</strong> ${mat}</p>`;
+            result += `<p><strong>Ancho:</strong> ${a} cm</p>`;
+            result += `<p><strong>Largo:</strong> ${l} cm</p>`;
+            result += `<p><strong>Espesor:</strong> ${e} micrones</p>`;
+            result += `<p><strong>Fuelles:</strong> ${fuelles > 0 ? `${fuelles} cm por lado` : '---'}</p>`;
+            result += `<p><strong>Ancho Óptico:</strong> ${op} cm</p>`;
+            result += `<p><strong>Peso por Metro:</strong> ${pm.toFixed(2)} g</p>`;
+            result += `<p><strong>Kilos Extrusión:</strong> ${kge.toFixed(2)} kg</p>`;
+            result += `<p><strong>Kilos Extrusión Corregidos:</strong> ${kgec.toFixed(2)} kg</p>`;
+            result += `<p><strong>Nota Extra a Extrusión:</strong> ${notaExtrusion || '---'}</p>`;
+
+            result += `<div class="separator"></div>`;
+            
+            result += `<div class="page-break"></div>`;
+
+            result += `<h2>Orden de Trabajo - Sellado</h2>`;
+            result += `<p><strong>Fecha de Emisión:</strong> ${fechaHoraEmision}</p>`;
+            result += `<p><strong>Fecha de Entrega:</strong> ${fechaEntrega ? formatFecha(fechaEntrega) : 'Sin Fecha'}</p>`;
+            result += `<p><strong>Anotar al Saco:</strong> ${cliente ? cliente + ' - ' : ''}${a}x${l}x${e} (${mat})</p>`;
+            result += `<p><strong>Usar Bobinas:</strong> ${cliente ? cliente + ' - ' : ''}${a}x${e} (${mat})</p>`;
+            result += `<p><strong>Largo:</strong> ${l} cm</p>`;
+            result += `<p><strong>Unidades al Saco:</strong> ${us}</p>`;
+            result += `<p><strong>Paquetes al Saco:</strong> ${(us / 10).toFixed(0)} paquetes de 10 unidades</p>`;
+            result += `<p><strong>Peso Bolsa:</strong> ${pu.toFixed(2)} g</p>`;
+            result += `<p><strong>Peso Paquete:</strong> ${(pu * 10).toFixed(2)} g</p>`;
+            result += `<p><strong>Peso Saco:</strong> ${ps.toFixed(2)} kg</p>`;
+            result += `<p><strong>Sacos Aprox:</strong> ${sa} sacos de ${us} + saldo</p>`;
+            result += `<p><strong>Trabajar a:</strong> ${e >= 0.059 ? "Una Pista" : "Dos Pistas"}</p>`;
+            result += `<p><strong>Nota Extra a Sellado:</strong> ${notaSellado || '---'}</p>`;
+
+            document.getElementById('resultados').innerHTML = result;
+        }
+
+        function imprimirEspecificaciones() {
+            window.print();
+        }
+
+        // Inicializar materiales al cargar la página
+        actualizarMaterial();
+    </script>
+</body>
+</html>
